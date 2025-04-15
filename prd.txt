@@ -1,0 +1,108 @@
+<context>
+# Overview  
+The Artist Trend Dashboard aims to track artist-level and track-level music consumption, monitor User Generated Content (UGC) activity (specifically TikTok), and highlight significant changes to surface trends. It provides the Marketing Department with actionable data and automatically generates executive summary reports.
+
+# Core Features  
+[List and describe the main features of your product.]
+- **Artist Card Creation:**
+  - **What it does:** Creates a profile for an artist based on their Spotify link.
+  - **Why it's important:** Centralizes artist data and metrics.
+  - **How it works:** Extracts Spotify track IDs, links them to unified song IDs via Luminate tables (`LUMINATE_UNIFIED_SONG_SPOTIFY_TRACKS`), queries daily metrics (`LUMINATE_DAILY_SONG_METRICS` for 'AUDIO ON DEMAND'), aggregates weekly data, and handles missing track data using artist-level data (`LUMINATE_ACCOUNTS`) as a fallback.
+- **UGC Tagging:**
+  - **What it does:** Allows manual linking of TikTok Sound IDs to artists.
+  - **Why it's important:** Enables tracking of TikTok trends related to specific artists.
+  - **How it works:** Stores manually entered TikTok Sound IDs per artist and queries `TIKTOK_SOUND_METRICS` for week-over-week post count changes.
+- **Visualization Dashboard:**
+  - **What it does:** Displays key metrics and trends for each artist.
+  - **Why it's important:** Provides an at-a-glance view of artist performance and trends.
+  - **How it works:** Shows total streams (this week vs. last week + % change), UGC post count (this week vs. last week + % change), graphs for consumption and UGC over time, a list of missing/unlinked tracks (optional), and badges for significant growth spikes (configurable thresholds: >= 2x for streams/UGC posts).
+- **Executive Reporting:**
+  - **What it does:** Generates and distributes weekly summaries to executives.
+  - **Why it's important:** Keeps leadership informed of key artist trends.
+  - **How it works:** Sends a weekly email with an attached PDF containing a sorted list of artists with notable metric increases, a section on top trending artists, and summary tables/graphs.
+
+# User Experience  
+[Describe the user journey and experience.]
+- **User Personas:**
+  - **Marketing Team:** Needs to easily create artist cards, link TikTok sounds, view detailed dashboards, and identify trends.
+  - **C-Level Executives:** Need concise, high-level weekly summaries of trending artists and significant changes delivered via email.
+- **Key User Flows:**
+  - **Marketing:** Input Spotify link -> Review/Confirm Artist Card data -> Input TikTok Sound IDs -> Monitor dashboard for trends and spikes.
+  - **Executive:** Receive weekly email -> Review PDF summary for key trends.
+- **UI/UX Considerations:**
+  - **Internal Dashboard:** Clean interface for artist card creation/management and clear visualization of metrics, trends, and graphs. Option to show/hide details like missing tracks. Configurable thresholds for spike badges.
+  - **Executive Summary PDF:** Professional, easy-to-read format focusing on top trends and changes. Prioritize clarity and scannability.
+
+# Technical Architecture  
+[Outline the technical implementation details.]
+- **System Components:** Data ingestion layer (connecting to required tables), data processing/aggregation engine, backend API, frontend dashboard (web application), PDF generation service, email service.
+- **Data Models:** Need schemas for storing Artist Card data, linked TikTok Sound IDs, aggregated weekly metrics, and potentially cached results.
+- **Database Tables Used:**
+  - `SPOTIFY_TRACKS`
+  - `LUMINATE_UNIFIED_SONG_SPOTIFY_TRACKS`
+  - `LUMINATE_DAILY_SONG_METRICS`
+  - `LUMINATE_ACCOUNTS`
+  - `TIKTOK_SOUND_METRICS`
+- **Metrics Focus:** Primarily 'AUDIO ON DEMAND' consumption from Luminate, aggregated to 'THIS_WEEK' and 'LAST_WEEK' totals. TikTok post counts from `TIKTOK_SOUND_METRICS`.
+- **Delta Thresholds:** Configurable, default to >= 2x week-over-week growth for stream spikes and UGC post count spikes.
+- **APIs and Integrations:** Potential integration with Spotify API (for profile data if needed beyond link input), internal database access, email delivery system.
+
+# Development Roadmap  
+[Break down the development process into phases.]
+- **MVP Requirements:**
+  1. Basic data pipeline to fetch and aggregate required metrics from Luminate and Spotify tables based on Spotify profile link input.
+  2. Core Artist Card creation functionality (manual Spotify link input).
+  3. Simple dashboard displaying weekly stream comparison (This Week vs Last Week + % change) for created artists.
+  4. Manual TikTok Sound ID input and storage per artist.
+  5. Basic UGC metric display (This Week vs Last Week + % change).
+- **Phase 2 Enhancements:**
+  1. Implement visualization graphs (consumption and UGC over time).
+  2. Add fallback logic for artist-level data (`LUMINATE_ACCOUNTS`).
+  3. Display missing/unlinked tracks.
+  4. Implement configurable spike badges.
+  5. Develop PDF generation for the executive summary.
+  6. Set up automated weekly email delivery.
+- **Future Considerations (Post-MVP/Phase 2):**
+  - Add segmenting by label/team.
+  - Implement multi-week trendlines.
+  - Add CSV export functionality for full metrics.
+  - Explore potential for automated TikTok sound tagging (marked as non-goal initially).
+
+# Logical Dependency Chain
+[Define the logical order of development.]
+1. **Data Access Layer:** Establish connections and queries to all required database tables (`SPOTIFY_TRACKS`, `LUMINATE_...`, `TIKTOK_SOUND_METRICS`). Verify data availability and structure.
+2. **Core Logic - Artist Metrics:** Develop the logic to link Spotify IDs to Unified Song IDs and aggregate `LUMINATE_DAILY_SONG_METRICS` for 'AUDIO ON DEMAND'. Implement fallback to `LUMINATE_ACCOUNTS`.
+3. **Backend API - Artist Card:** Create API endpoints for creating Artist Cards (taking Spotify link), storing associated data, and retrieving aggregated metrics.
+4. **Frontend - Basic Dashboard:** Build the UI for inputting Spotify links and displaying the basic Artist Card with weekly stream comparison.
+5. **UGC Integration:** Add functionality for manual TikTok Sound ID input (backend storage and API), querying `TIKTOK_SOUND_METRICS`, and displaying UGC comparison on the dashboard.
+6. **Visualizations:** Integrate graphing libraries to display consumption and UGC trends over time.
+7. **Advanced Features:** Implement missing track display and configurable spike badges.
+8. **Reporting:** Develop the PDF generation logic and integrate the email service for automated weekly reports.
+
+# Risks and Mitigations  
+[Identify potential risks and how they'll be addressed.]
+- **Data Quality/Availability:** Data in source tables (`LUMINATE`, `SPOTIFY_TRACKS`, `TIKTOK_SOUND_METRICS`) might be incomplete, delayed, or inaccurate.
+  - **Mitigation:** Implement robust error handling, logging for missing data, fallback logic (using `LUMINATE_ACCOUNTS`), clearly display data caveats (like missing tracks) in the UI. Establish monitoring for data source freshness.
+- **Spotify/Luminate ID Matching:** Issues matching `SPOTIFY_TRACKS` to `LUMINATE_UNIFIED_SONG_SPOTIFY_TRACKS`.
+  - **Mitigation:** Log matching failures, provide UI feedback on unlinked tracks, potentially allow manual linking as a fallback (though not in initial scope).
+- **TikTok Sound ID Accuracy:** Manual input is prone to errors.
+  - **Mitigation:** Input validation, potentially add a search/verification step against TikTok's API in the future. For MVP, rely on user accuracy.
+- **Scalability:** Performance issues as the number of artists and data volume grows.
+  - **Mitigation:** Optimize database queries, consider caching aggregated results, design backend for horizontal scaling if necessary.
+- **External API Changes:** Changes to Spotify or TikTok data access (if used directly later) or schema changes in Luminate tables.
+  - **Mitigation:** Design with abstraction layers, have monitoring, and maintain contact with data providers if possible.
+
+# Appendix  
+[Include any additional information.]
+- **Required Database Tables:**
+  - `SPOTIFY_TRACKS`
+  - `LUMINATE_UNIFIED_SONG_SPOTIFY_TRACKS`
+  - `LUMINATE_DAILY_SONG_METRICS`
+  - `LUMINATE_ACCOUNTS`
+  - `TIKTOK_SOUND_METRICS`
+- **Key Metrics:**
+  - `AUDIO ON DEMAND` (Luminate)
+  - TikTok Post Count (TikTok)
+- **Primary User Roles:** Marketing Team, C-Level Executives.
+
+</context> 

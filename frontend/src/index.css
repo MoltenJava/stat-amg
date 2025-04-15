@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Ubuntu:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Custom Branding Colors */
+    --background-custom: 240 67% 94%; /* Equivalent of #FCFCEC (assuming HSL, needs check) -> Let's use hex directly */
+    --primary-custom: 114 55% 75%;   /* Equivalent of #BFE4BC (assuming HSL, needs check) -> Let's use hex directly */
+    --secondary-custom: 142 6% 16%; /* Equivalent of #252B27 (assuming HSL, needs check) -> Let's use hex directly */
+    
+    /* Map to existing theme variables (example, adjust as needed) */
+    --background: 80 80% 96%; /* #FCFCEC */
+    --foreground: 142 6% 16%; /* #252B27 */
+
+    --card: 0 0% 100%; /* Keep card white or adjust */
+    --card-foreground: 142 6% 16%; /* Use secondary */
+
+    --popover: 0 0% 100%; /* Keep popover white or adjust */
+    --popover-foreground: 142 6% 16%; /* Use secondary */
+
+    --primary: 114 55% 75%; /* #BFE4BC */
+    --primary-foreground: 142 6% 16%; /* Use secondary for contrast on primary */
+
+    --secondary: 142 6% 16%; /* #252B27 */
+    --secondary-foreground: 80 80% 96%; /* Use background for contrast on secondary */
+
+    --muted: 280 10% 95%; /* Adjust as needed */
+    --muted-foreground: 142 6% 35%; /* Darker secondary */
+
+    --accent: 114 55% 85%; /* Lighter primary */
+    --accent-foreground: 142 6% 16%; /* Use secondary */
+
+    --destructive: 0 84.2% 60.2%; /* Keep destructive red or adjust */
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 114 20% 80%; /* Lighter primary border */
+    --input: 114 20% 90%;  /* Very light primary for input */
+    --ring: 114 55% 65%;  /* Darker primary for ring */
+
+    --radius: 1rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-ubuntu;
+    background-image: none;
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  .bento-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4;
+  }
+  
+  .bento-card {
+    @apply bg-white bg-opacity-70 backdrop-blur-sm rounded-2xl p-4 shadow-md hover:shadow-lg transition-all duration-300 border border-white border-opacity-40;
+  }
+
+  .bento-card-sm {
+    @apply col-span-1 row-span-1;
+  }
+  
+  .bento-card-md {
+    @apply col-span-1 md:col-span-2 row-span-1;
+  }
+  
+  .bento-card-lg {
+    @apply col-span-1 md:col-span-2 row-span-2;
+  }
+
+  .card-gradient-pink {
+    @apply bg-gradient-to-br from-pastel-pink to-white;
+  }
+  
+  .card-gradient-purple {
+    @apply bg-gradient-to-br from-pastel-purple to-white;
+  }
+  
+  .card-gradient-blue {
+    @apply bg-gradient-to-br from-pastel-blue to-white;
+  }
+  
+  .card-gradient-green {
+    @apply bg-gradient-to-br from-pastel-green to-white;
+  }
+  
+  .card-gradient-yellow {
+    @apply bg-gradient-to-br from-pastel-yellow to-white;
+  }
+
+  .card-gradient-peach {
+    @apply bg-gradient-to-br from-pastel-peach to-white;
+  }
+
+  .search-bar {
+    @apply w-full max-w-lg bg-white bg-opacity-70 backdrop-blur-sm border border-white border-opacity-40 rounded-full px-5 py-3 flex items-center gap-2 shadow-md focus-within:shadow-lg transition-all;
+  }
+
+  .search-input {
+    @apply w-full bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground;
+  }
+
+  .artist-avatar {
+    @apply rounded-full object-cover border-2 border-white shadow-sm;
+  }
+
+  .stat-label {
+    @apply text-sm text-muted-foreground font-medium;
+  }
+
+  .stat-value {
+    @apply text-lg font-semibold;
+  }
+
+  .detail-modal {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm;
+  }
+
+  .detail-content {
+    @apply relative bg-white rounded-2xl shadow-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-auto;
+  }
+}
