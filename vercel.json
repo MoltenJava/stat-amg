@@ -13,7 +13,7 @@
         "use": "@vercel/static-build",
         "config": {
           "buildCommand": "npm run build",
-          "distDir": "dist"
+          "distDir": "frontend/dist"
         }
       }
     ],
@@ -27,7 +27,8 @@
       },
       {
         "src": "/(.*)",
-        "dest": "/index.html"
+        "dest": "/frontend/dist/index.html"
       }
     ]
   }
+  
