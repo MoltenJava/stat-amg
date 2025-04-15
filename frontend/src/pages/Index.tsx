@@ -350,18 +350,18 @@ const Index: React.FC = () => {
 
   return (
     <TooltipProvider>
-       <div className="min-h-screen p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
           {/* Header - RESTRUCTURED Layout */}
           <header className="mb-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
                 {/* Left Group: Logo + Search Bar */}
                 <div className="flex items-center gap-4 w-full md:w-auto">
                     <img src="/logo.PNG" alt="Stat Logo" className="h-10 object-contain flex-shrink-0" />
                     <div className="flex-grow md:flex-grow-0 max-w-lg w-full">
-                         <SearchBar 
-                            value={searchTerm}
-                            onChange={setSearchTerm}
-                        />
-                    </div>
+            <SearchBar 
+              value={searchTerm}
+              onChange={setSearchTerm}
+            />
+          </div>
                 </div>
 
                 {/* Right: Button Group - Remains the same */}
@@ -597,8 +597,8 @@ const Index: React.FC = () => {
                              <List className="mr-1 h-4 w-4" /> View Reports
                         </Link>
                     </Button>
-                </div>
-          </header>
+        </div>
+      </header>
 
           {/* --- Main Content Area with Sidebar --- */}
           <div className="flex flex-col md:flex-row gap-8 mt-8">
@@ -610,8 +610,8 @@ const Index: React.FC = () => {
                       {Array.from({ length: 8 }).map((_, i) => (
                          <Skeleton key={i} className="h-[200px] w-full rounded-xl" />
                       ))}
-                   </div>
-                )}
+           </div>
+        )}
                 {errorArtists && (
                    <Alert variant="destructive">
                       <AlertTitle>Error</AlertTitle>
@@ -621,70 +621,70 @@ const Index: React.FC = () => {
                 {!isLoadingArtists && !errorArtists && (
                    <div className="bento-grid"> 
                       {filteredArtists && filteredArtists.length > 0 ? (
-                         filteredArtists.map(artist => (
-                            <ArtistCard 
+              filteredArtists.map(artist => (
+                <ArtistCard 
                                key={artist.ID}
-                               artist={artist} 
-                               onDetailClick={() => handleOpenDetail(artist)}
-                            />
-                         ))
-                      ) : (
+                  artist={artist} 
+                  onDetailClick={() => handleOpenDetail(artist)}
+                />
+              ))
+            ) : (
                          <div className="col-span-full flex flex-col items-center justify-center p-12 text-center">
-                            <p className="text-lg mb-2">No artists found</p>
+                <p className="text-lg mb-2">No artists found</p>
                             <p className="text-muted-foreground text-sm">
                                {searchTerm ? 'Try a different search term' : (artists && artists.length === 0) ? 'No artists added yet.' : 'Your search did not match any artists.'}
-                            </p>
-                         </div>
-                      )}
-                   </div>
-                )}
+                 </p>
+              </div>
+            )}
+          </div>
+        )}
              </div>
 
-          </div>
+      </div>
 
-          {/* Detail Modal */} 
-          {selectedArtist && (
-            <ArtistDetail 
-              artist={selectedArtist} 
-              onClose={handleCloseDetail}
-            />
-          )}
-          
-          {/* Share Modal */} 
-          <ShareModal 
-              artist={selectedArtistShare}
-              timeFrameMonths={shareModalTimeFrame} 
-              isOpen={!!selectedArtistShare}
-              onClose={handleCloseShare}
-          />
+      {/* Detail Modal */} 
+      {selectedArtist && (
+        <ArtistDetail 
+          artist={selectedArtist} 
+          onClose={handleCloseDetail}
+        />
+      )}
+      
+      {/* Share Modal */} 
+      <ShareModal 
+          artist={selectedArtistShare}
+          timeFrameMonths={shareModalTimeFrame} 
+          isOpen={!!selectedArtistShare}
+          onClose={handleCloseShare}
+      />
 
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="icon">
-                <X className="h-4 w-4" />
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline" size="icon">
+            <X className="h-4 w-4" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogTitle>Add Artist</DialogTitle>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Input
+                type="url"
+                placeholder="Enter Spotify Artist URL..."
+                value={newArtistUrl}
+                onChange={(e) => setNewArtistUrl(e.target.value)}
+                required
+                disabled={createMutation.isPending}
+              />
+              <Button type="submit" disabled={createMutation.isPending}>
+                {createMutation.isPending ? 'Adding...' : 'Add Artist'}
               </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogTitle>Add Artist</DialogTitle>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Input
-                    type="url"
-                    placeholder="Enter Spotify Artist URL..."
-                    value={newArtistUrl}
-                    onChange={(e) => setNewArtistUrl(e.target.value)}
-                    required
-                    disabled={createMutation.isPending}
-                  />
-                  <Button type="submit" disabled={createMutation.isPending}>
-                    {createMutation.isPending ? 'Adding...' : 'Add Artist'}
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-       </div>
+    </div>
     </TooltipProvider>
   );
 };
