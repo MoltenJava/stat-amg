@@ -5,16 +5,13 @@
         "src": "frontend/package.json",
         "use": "@vercel/static-build",
         "config": {
-          "buildCommand": "npm run build",
-          "distDir": "dist"
+          "distDir": "dist",
+          "buildCommand": "cd frontend && npm install && npm run build"
         }
       },
       {
-        "src": "package.json",
-        "use": "@vercel/node",
-        "config": {
-          "includeFiles": ["dist/**"]
-        }
+        "src": "dist/src/server.js",
+        "use": "@vercel/node"
       }
     ],
     "routes": [
@@ -23,7 +20,10 @@
         "dest": "/dist/src/server.js"
       },
       { "handle": "filesystem" },
-      { "src": "/(.*)", "dest": "/index.html" }
+      {
+        "src": "/(.*)",
+        "dest": "/index.html"
+      }
     ],
     "outputDirectory": "frontend/dist"
   }
