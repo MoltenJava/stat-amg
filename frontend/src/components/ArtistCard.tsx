@@ -3,6 +3,7 @@ import { Music, TrendingUp, Users, Percent, Flame, FileText } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { format, subMonths } from 'date-fns';
+import { getApiUrl } from '@/lib/apiUtils';
 
 interface Artist {
     ID: number;
@@ -36,7 +37,7 @@ const getIsoDateRange = (monthsAgo: number): { startDate: string; endDate: strin
 };
 
 const fetchUgcLinks = async (artistId: number): Promise<ArtistUgcLink[]> => {
-  const url = `/api/artist-cards/${artistId}/ugc-links`;
+  const url = getApiUrl(`/api/artist-cards/${artistId}/ugc-links`);
   console.log(`[ArtistCard fetchUgcLinks] Fetching all links for artist ${artistId}`);
   const response = await fetch(url);
   if (!response.ok) {
@@ -49,7 +50,8 @@ const fetchUgcLinks = async (artistId: number): Promise<ArtistUgcLink[]> => {
 const fetchDetailedUgcTimeSeries = async (artistId: number): Promise<DetailedUgcData> => {
   const months = 1;
   const { startDate, endDate } = getIsoDateRange(months);
-  const response = await fetch(`/api/artist-cards/${artistId}/ugc-timeseries/details?startDate=${startDate}&endDate=${endDate}`);
+  const url = getApiUrl(`/api/artist-cards/${artistId}/ugc-timeseries/details?startDate=${startDate}&endDate=${endDate}`);
+  const response = await fetch(url);
   if (!response.ok) throw new Error('Failed to fetch detailed UGC timeseries for card');
   const rawData = await response.json();
   return rawData?.soundTimeSeries || {};

@@ -24,6 +24,7 @@ import { Loader2 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Link } from 'react-router-dom';
 import { toast } from "sonner";
+import { getApiUrl } from '@/lib/apiUtils';
 
 // Define Artist type for the frontend (matching expected API response)
 // Renamed from ArtistCard back to Artist and added expected fields
@@ -64,7 +65,8 @@ interface ArtistSongInfo {
 // --- Fetch Function for Artist Songs --- 
 const fetchArtistSongsForReport = async (artistId: number | null): Promise<ArtistSongInfo[]> => {
   if (!artistId) return []; // Don't fetch if no artist ID
-  const response = await fetch(`/api/artist-cards/${artistId}/songs`);
+  const url = getApiUrl(`/api/artist-cards/${artistId}/songs`);
+  const response = await fetch(url);
   if (!response.ok) {
     throw new Error('Failed to fetch artist songs');
   }
@@ -86,8 +88,8 @@ const mockTopReactiveSongs: TopReactiveSong[] = [
 // --- Placeholder for fetchArtists --- Fix Linter Error
 const fetchArtists = async (searchTerm: string): Promise<Artist[]> => {
   console.log(`[fetchArtists - Placeholder] Fetching artists for term: ${searchTerm}`)
-  // Replace with your actual API call logic
-  const response = await fetch(`/api/artist-cards?search=${encodeURIComponent(searchTerm)}`);
+  const url = getApiUrl(`/api/artist-cards?search=${encodeURIComponent(searchTerm)}`);
+  const response = await fetch(url);
   if (!response.ok) {
     throw new Error('Network response was not ok');
   }
@@ -97,8 +99,8 @@ const fetchArtists = async (searchTerm: string): Promise<Artist[]> => {
 // --- Fetch Function for Top Reactive Songs (Hypothetical Endpoint) ---
 const fetchTopReactiveSongs = async (limit: number = 7): Promise<TopReactiveSong[]> => {
   console.log(`[fetchTopReactiveSongs] Fetching top ${limit} reactive songs`);
-  // --- Call the actual API endpoint --- 
-  const response = await fetch(`/api/songs/top-reactive?limit=${limit}`);
+  const url = getApiUrl(`/api/songs/top-reactive?limit=${limit}`);
+  const response = await fetch(url);
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({})); // Try to parse error
     console.error("Error fetching top reactive songs:", response.status, errorData);
@@ -189,7 +191,8 @@ const Index: React.FC = () => {
   // Mutation hook for creating/finding an artist card via API
   const createMutation = useMutation<unknown, Error, { url: string }>({
     mutationFn: async (data) => { // Use fetch to call API
-      const response = await fetch('/api/artist-cards', {
+      const apiUrl = getApiUrl('/api/artist-cards');
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ spotifyUrl: data.url }) // Send URL in body
@@ -203,30 +206,34 @@ const Index: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['artists', debouncedSearchTerm] });
       setNewArtistUrl(''); 
+      showNotification('Artist card added/found successfully!', 'success');
+      setIsAddArtistModalOpen(false);
     },
-    onError: (err) => {
-      console.error("Error adding artist:", err);
+    onError: (error) => {
+      showNotification(`Error adding artist: ${error.message}`, 'error');
     },
   });
 
   // Mutation hook for deleting an artist card via API
-  const deleteMutation = useMutation<void, Error, number>({
-    mutationFn: async (artistId) => { // Use fetch to call API
-      const response = await fetch(`/api/artist-cards/${artistId}`, {
-        method: 'DELETE'
+  const deleteMutation = useMutation<unknown, Error, number>({
+    mutationFn: async (artistId) => {
+      const apiUrl = getApiUrl(`/api/artist-cards/${artistId}`);
+      const response = await fetch(apiUrl, {
+        method: 'DELETE',
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({})); // Try to parse error
-        throw new Error(errorData.error || `Failed to delete artist card ${artistId}`);
+        throw new Error(errorData.error || 'Failed to delete artist card');
       }
-      // No need to return response.json() for DELETE if backend sends no body
+      // No JSON body expected on successful DELETE
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['artists', debouncedSearchTerm] });
       setSelectedArtist(null); 
+      showNotification('Artist card deleted successfully!', 'success');
     },
-    onError: (err) => {
-      console.error("Error deleting artist:", err);
+    onError: (error) => {
+      showNotification(`Error deleting artist: ${error.message}`, 'error');
     },
   });
 

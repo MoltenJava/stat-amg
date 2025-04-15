@@ -14,6 +14,7 @@ import { ChartContainer as UgcChart } from './ui/chart'; // Assuming this path i
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getApiUrl } from '@/lib/apiUtils'; // Import the utility
 
 // Define Artist type locally (matching the prop structure from Index.tsx)
 interface Artist {
@@ -98,7 +99,7 @@ const getIsoDateRange = (monthsAgo: number): { startDate: string; endDate: strin
 };
 
 const fetchUgcLinks = async (artistId: number, unifiedSongId?: number | null): Promise<ArtistUgcLink[]> => {
-  let url = `/api/artist-cards/${artistId}/ugc-links`;
+  let url = getApiUrl(`/api/artist-cards/${artistId}/ugc-links`);
   if (typeof unifiedSongId === 'number' && !isNaN(unifiedSongId)) {
     url += `?unifiedSongId=${unifiedSongId}`;
     console.log(`[fetchUgcLinks] Fetching links for song ${unifiedSongId}`);
@@ -115,14 +116,16 @@ const fetchUgcLinks = async (artistId: number, unifiedSongId?: number | null): P
 
 const fetchDetailedUgcTimeSeries = async (artistId: number, months: number): Promise<DetailedUgcData> => {
   const { startDate, endDate } = getIsoDateRange(months);
-  const response = await fetch(`/api/artist-cards/${artistId}/ugc-timeseries/details?startDate=${startDate}&endDate=${endDate}`);
+  const url = getApiUrl(`/api/artist-cards/${artistId}/ugc-timeseries/details?startDate=${startDate}&endDate=${endDate}`);
+  const response = await fetch(url);
   if (!response.ok) throw new Error('Failed to fetch detailed UGC timeseries');
   const rawData = await response.json();
   return rawData?.soundTimeSeries || {};
 };
 
 const fetchArtistSongs = async (artistId: number): Promise<ArtistSongInfo[]> => {
-    const response = await fetch(`/api/artist-cards/${artistId}/songs`);
+    const url = getApiUrl(`/api/artist-cards/${artistId}/songs`);
+    const response = await fetch(url);
     if (!response.ok) {
         console.error(`Failed to fetch songs for artist ${artistId}. Status: ${response.status}`);
         throw new Error('Failed to fetch artist songs');
@@ -136,7 +139,7 @@ const fetchCombinedDailyStreams = async (artistId: number, months: number, unifi
   console.log(`[fetchCombinedDailyStreams START] Fetching for Artist: ${artistId}, Song: ${unifiedSongId}`);
   console.time(`[fetchCombinedDailyStreams TIME] Artist: ${artistId}, Song: ${unifiedSongId}`);
   const daysLookback = months * 30;
-  let url = `/api/artist-cards/${artistId}/daily-streams?daysLookback=${daysLookback}`;
+  let url = getApiUrl(`/api/artist-cards/${artistId}/daily-streams?daysLookback=${daysLookback}`);
   if (typeof unifiedSongId === 'number') {
       url += `&unifiedSongId=${unifiedSongId}`;
   }
@@ -173,7 +176,8 @@ const fetchCombinedDailyStreams = async (artistId: number, months: number, unifi
 
 const deleteUgcLinkApi = async (linkId: number): Promise<void> => {
     console.log(`[deleteUgcLinkApi] Deleting link ID: ${linkId}`);
-    const response = await fetch(`/api/artist-cards/0/ugc-links/${linkId}`, { // Artist ID is ignored in backend for this route
+    const url = getApiUrl(`/api/artist-cards/0/ugc-links/${linkId}`);
+    const response = await fetch(url, { // Artist ID is ignored in backend for this route
         method: 'DELETE',
     });
     if (!response.ok) {
@@ -193,7 +197,7 @@ const fetchSongReactivity = async (
     const { startDate, endDate } = getIsoDateRange(months);
     const region = 'US'; // Default to US for now, could be made dynamic
     // CORRECTED URL AGAIN: Include artistId in the path as well
-    const url = `/api/artist-cards/${artistId}/songs/${unifiedSongId}/reactivity?artistId=${artistId}&region=${region}&startDate=${startDate}&endDate=${endDate}`;
+    const url = getApiUrl(`/api/artist-cards/${artistId}/songs/${unifiedSongId}/reactivity?artistId=${artistId}&region=${region}&startDate=${startDate}&endDate=${endDate}`);
     console.log(`[fetchSongReactivity] Fetching reactivity for Song: ${unifiedSongId}, Artist: ${artistId}, Dates: ${startDate} to ${endDate}, URL: ${url}`);
     const response = await fetch(url);
     if (!response.ok) {
@@ -306,7 +310,8 @@ const ArtistDetail: React.FC<ArtistDetailProps> = ({ artist, onClose }) => {
   // --- Mutations ---
   const addLinkMutation = useMutation({
       mutationFn: async (data: { artistCardId: number; tiktokSoundUrl: string; unifiedSongId: number | null }) => {
-          const response = await fetch(`/api/artist-cards/${data.artistCardId}/ugc-links`, {
+          const url = getApiUrl(`/api/artist-cards/${data.artistCardId}/ugc-links`);
+          const response = await fetch(url, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

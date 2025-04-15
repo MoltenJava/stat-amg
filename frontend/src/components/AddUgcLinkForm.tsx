@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { getApiUrl } from '@/lib/apiUtils';
 
 // Define type corresponding to backend ArtistUgcLink
 interface ArtistUgcLink {
@@ -21,17 +22,27 @@ interface AddUgcLinkFormProps {
 }
 
 // Assumed API function - Requires backend endpoint implementation
-const addUgcLink = async ({ artistId, tiktokSoundUrl }: { artistId: number; tiktokSoundUrl: string }): Promise<ArtistUgcLink> => {
-  const response = await fetch(`/api/artist-cards/${artistId}/ugc-links`, {
+const addUgcLink = async (data: { artistCardId: number; tiktokSoundUrl: string }): Promise<ArtistUgcLink> => {
+  // Extract sound ID from URL (basic example, might need refinement)
+  const soundIdMatch = data.tiktokSoundUrl.match(/\/(\d+)/);
+  const soundId = soundIdMatch ? soundIdMatch[1] : null;
+
+  if (!soundId) {
+    throw new Error('Could not extract TikTok Sound ID from URL.');
+  }
+
+  const apiUrl = getApiUrl(`/api/artist-cards/${data.artistCardId}/ugc-links`);
+  const response = await fetch(apiUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ tiktokSoundUrl }),
+    body: JSON.stringify({ tiktokSoundId: soundId }),
   });
+
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
-    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to add UGC link');
   }
   return response.json();
 };
@@ -66,7 +77,7 @@ const AddUgcLinkForm: React.FC<AddUgcLinkFormProps> = ({ artistId }) => {
         return;
     }
     
-    mutation.mutate({ artistId, tiktokSoundUrl });
+    mutation.mutate({ artistCardId: artistId, tiktokSoundUrl });
   };
 
   return (

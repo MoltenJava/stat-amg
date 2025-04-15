@@ -10,6 +10,7 @@ import { format, differenceInDays, subDays } from 'date-fns';
 import ReportLineChart from './charts/ReportLineChart';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Info } from 'lucide-react';
+import { getApiUrl } from '@/lib/apiUtils';
 
 // Helper function to format large numbers (similar to ArtistCard)
 const formatNumber = (num: number | null | undefined): string => {
@@ -63,15 +64,14 @@ interface ReportData {
 }
 
 // Fetch function for report data
-const fetchReportData = async (reportId: string | undefined): Promise<ReportData> => {
-    if (!reportId) throw new Error('Report ID is required');
-    const response = await fetch(`/api/reports/${reportId}`);
+const fetchReportData = async (reportId: string): Promise<ReportData | null> => {
+    const url = getApiUrl(`/api/reports/${reportId}`);
+    const response = await fetch(url);
     if (!response.ok) {
         if (response.status === 404) {
-            throw new Error('Report not found or may have expired.');
+            return null;
         }
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to fetch report data');
+        throw new Error('Failed to fetch report data');
     }
     return response.json();
 };

@@ -1,11 +1,12 @@
     // frontend/src/pages/ReportsList.tsx
-    import React from 'react';
+    import React, { useState, useEffect } from 'react';
     import { Link } from 'react-router-dom';
     import { Button } from '@/components/ui/button';
     import { ArrowLeft, Loader2, AlertTriangle } from 'lucide-react';
     import { useQuery } from '@tanstack/react-query';
     import { format } from 'date-fns';
     import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+    import { getApiUrl } from '@/lib/apiUtils'; // Import the utility
 
     // Define the structure matching the backend response from listSavedReports
     interface ReportListItem {
@@ -17,13 +18,14 @@
     }
 
     // Function to fetch the list of reports
-    const fetchReportsList = async (): Promise<ReportListItem[]> => {
-        const response = await fetch('/api/reports'); // Call the backend endpoint
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || 'Failed to fetch reports list');
-        }
-        return response.json();
+    const fetchSavedReports = (limit = 50, offset = 0): Promise<ReportListItem[]> => {
+        const url = getApiUrl(`/api/reports?limit=${limit}&offset=${offset}`); // Use util
+        return fetch(url).then(res => {
+            if (!res.ok) {
+                throw new Error('Failed to fetch saved reports');
+            }
+            return res.json();
+        });
     };
 
     const ReportsList: React.FC = () => {
@@ -34,7 +36,7 @@
         error 
       } = useQuery<ReportListItem[], Error>({
           queryKey: ['savedReportsList'], // Unique query key
-          queryFn: fetchReportsList,
+          queryFn: () => fetchSavedReports(),
           staleTime: 5 * 60 * 1000, // Cache for 5 minutes
       });
 
